@@ -40,7 +40,17 @@ def count_completed_passes(events, team):
         if event["type"] == "pass" and event["team"] == team and event["successful"] is True:
             completed += 1
 
-    return completed
+    return completed 
+
+def describe_shot_change(team, early_shots, late_shots):
+    change = late_shots - early_shots
+
+    if change > 0:
+        return f"{team}'s shots increased from {early_shots} to {late_shots}."
+    elif change < 0:
+        return f"{team}'s shots decreased from {early_shots} to {late_shots}."
+    else:
+        return f"{team} took {early_shots} shots in each period."
 
 print(len(events)) 
 print(events[0]) 
@@ -148,18 +158,29 @@ red_shot_change = red_late_shots - red_early_shots
 
 print("Change in Red shots:", red_shot_change) 
 
-# Shot analysis portion (Blue team)
-if blue_shot_change > 0:
-    print(f"Blue's shots increased from {blue_early_shots} to {blue_late_shots} in the later period.")
-elif blue_shot_change < 0:
-    print("Blue took fewer shots in the later period.")
-else:
-    print("Blue took the same number of shots in both periods.") 
+print("\n=== MATCH REPORT ===")
+# Count the number of stats per team
+for team in ["Blue", "Red"]:
+    team_shots = count_events(events, team, "shot")
+    team_turnovers = count_events(events, team, "turnover") 
+    team_passes = count_events(events, team, "pass")
 
-# Shot analysis portion (Red team) 
-if red_shot_change > 0: 
-    print("Red took more shots later in the period.") 
-elif red_shot_change < 0: 
-     print(f"Red's shots decreased from {red_early_shots} to {red_late_shots} in the later period.")
-else: 
-    print("Red took the same number of shots in both periods.") 
+    print(f"\n{team}")
+    print(f"Shots: {team_shots}")
+    print(f"Turnovers: {team_turnovers}") 
+    print(f"Passes: {team_passes}") 
+
+
+    # Pass percentage
+    team_completed_passes = count_completed_passes(events, team)
+    print(f"Completed passes: {team_completed_passes}")
+
+    if team_passes > 0:
+        completion_percentage = (team_completed_passes / team_passes) * 100
+        print(f"Pass completion: {completion_percentage:.1f}%")
+    else:
+        print("Pass completion: N/A") 
+
+    early_shots = count_events(first_half_events, team, "shot")
+    late_shots = count_events(second_half_events, team, "shot")
+    print(describe_shot_change(team, early_shots, late_shots))
